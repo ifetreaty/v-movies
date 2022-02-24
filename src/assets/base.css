@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: "Neris Thin";
+  src: url("./fonts/Neris-Thin.ttf");
+  font-weight: 300;
+}
+
+@font-face {
+  font-family: "Neris";
+  src: url("./fonts/Neris-Light.ttf");
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: "Neris SemiBold";
+  src: url("./fonts/Neris-SemiBold.ttf");
+  font-weight: 600;
+}
+
+@font-face {
+  font-family: "Neris Black";
+  src: url("./fonts/Neris-Black.ttf");
+  font-weight: 900;
+}
+
+html * {
+  font-family: "Neris" !important;
+}
