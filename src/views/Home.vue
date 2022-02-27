@@ -7,11 +7,21 @@ import {
   XIcon,
 } from "@heroicons/vue/solid";
 import { onMounted, ref } from "vue";
+import { Splide, SplideSlide } from "@splidejs/vue-splide"
+import { getDiscover, getRecommended } from "../../services/api";
 
 const showModal = ref(false);
+const recommended = ref([])
+const discovered = ref([])
+const splideInstance = ref(null);
 
-onMounted(() => {
-  
+onMounted(async () => {
+  const [ recommendedResponse, discoverResponse ] = await Promise.all([getRecommended(), getDiscover()])
+  const { results } = await recommendedResponse.json()
+  const { results: discoverResults } = await discoverResponse.json()
+  recommended.value = results
+  discoverResults.length = 5
+  discovered.value = discoverResults
 });
 </script>
 
@@ -67,24 +77,28 @@ onMounted(() => {
       <div class="flex justify-between pb-8">
         <div class="font-bold text-2xl">Recommended Movies</div>
         <div class="flex">
-          <ChevronLeftIcon class="w-6 h-6 -mb-1 ml-2"></ChevronLeftIcon>
-          <ChevronRightIcon class="w-6 h-6 -mb-1 ml-2"></ChevronRightIcon>
+          <button @click="splideInstance.go('<')">
+            <ChevronLeftIcon class="w-6 h-6 -mb-1 ml-2"></ChevronLeftIcon>
+          </button>
+          <button @click="splideInstance.go('>')">
+            <ChevronRightIcon class="w-6 h-6 -mb-1 ml-2"></ChevronRightIcon>
+          </button>
         </div>
       </div>
-      <div class="flex space-x-10">
-        <div class="bg-black">
-          <img src="/images/hero-bg.png" class="" />
-        </div>
-        <div class="bg-black">
-          <img src="/images/hero-bg.png" class="" />
-        </div>
-        <div class="bg-black">
-          <img src="/images/hero-bg.png" class="" />
-        </div>
-        <div class="bg-black">
-          <img src="/images/hero-bg.png" class="" />
-        </div>
-      </div>
+      <Splide :options="{
+        perPage: 4,
+        perMove: 1,
+        pagination: false,
+        arrows: false,
+        gap: '2rem',
+        height: '34rem'
+      }" ref="splideInstance">
+        <SplideSlide v-for="movie in recommended" :key="movie.id">
+          <div class="bg-black h-full relative">
+            <img :src="`https://image.tmdb.org/t/p/w500/${movie.poster_path}`" class="h-full w-full object-cover"/>
+          </div>
+        </SplideSlide>
+      </Splide>
     </div>
     <div class="container py-8">
       <div class="flex relative w-full">
@@ -108,51 +122,17 @@ onMounted(() => {
         </ul>
       </div>
       <div class="flex flex-col space-y-12 py-16">
-        <div class="flex space-x-8">
+        <div class="flex space-x-8" v-for="movie in discovered" :key="movie.id">
           <div class="bg-black h-[15rem] w-[25rem]">
             <img
-              src="/images/hero-bg.png"
+              :src="`https://image.tmdb.org/t/p/w500/${movie.backdrop_path}`"
               class="object-contain h-full w-full"
             />
           </div>
           <div class="space-y-4 flex flex-col py-4 flex-1">
-            <div class="font-bold text-2xl">Up Animation Movie</div>
+            <div class="font-bold text-2xl">{{movie.title}}</div>
             <div class="flex-1 w-3/5">
-              Carl, an old widower, goes off on an adventure in his flying house
-              in search of Paradise Falls, his wife's dream destination.
-            </div>
-            <div class="font-bold">+ Add To Watch List</div>
-          </div>
-        </div>
-        <div class="flex space-x-8">
-          <div class="bg-black h-[15rem] w-[25rem]">
-            <img
-              src="/images/hero-bg.png"
-              class="object-contain h-full w-full"
-            />
-          </div>
-          <div class="space-y-4 flex flex-col py-4 flex-1">
-            <div class="font-bold text-2xl">Beauty and the Beast</div>
-            <div class="flex-1 w-3/5">
-              Belle, a village girl, embarks on a journey to save her father
-              from a creature that has locked him in his dungeon.
-            </div>
-            <div class="font-bold">+ Add To Watch List</div>
-          </div>
-        </div>
-        <div class="flex space-x-8">
-          <div class="bg-black h-[15rem] w-[25rem]">
-            <img
-              src="/images/hero-bg.png"
-              class="object-contain h-full w-full"
-            />
-          </div>
-          <div class="space-y-4 flex flex-col py-4 flex-1">
-            <div class="font-bold text-2xl">Big Hero 6</div>
-            <div class="flex-1 w-3/5">
-              Hiro, a robotics prodigy, joins hands with Baymax in order to
-              avenge his brother's death. They then team up with Hiro's friends
-              to form a team of high-tecl heroes.
+              {{movie.overview}}
             </div>
             <div class="font-bold">+ Add To Watch List</div>
           </div>
